@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title></title>
+</head>
+
+<body class="container mt-5">
+
+    <table class="table table-light mt-5">
+        <thead class="thead-dark">
+            <tr>
+                <th >S.no</th>
+                <th >Name </th>
+                <th >Email </th>
+                <th >Age </th>
+                <th >Delete </th>
+                <th >Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr >
+                <th>
+                    <% for (var i =0; i<juser.length ;  i++ ) { %>
+                    <br /> <%=[i+1] %>
+                    <% } %>
+                </th>
+                <th>
+                    <% for (var i =0; i<juser.length ;  i++ ) { %>
+                    <br /> <%=juser[i]['name'] %>
+                    <% } %>
+                </th>
+                <th>
+                    <% for (var i =0; i<juser.length ;  i++ ) { %>
+                    <br /> <%=juser[i]['email'] %>
+                    <% } %>
+                </th>
+                <th>
+                    <% for (var i =0; i<juser.length ;  i++ ) { %>
+                    <br /> <%=juser[i]['age'] %>
+                    <% } %>
+                </th>
+                <th>
+                    <% for (var i =0; i<juser.length ;  i++ ) { %>
+                    <br /> <%=juser[i]['is_deleted'] %>
+                    <% } %>
+                </th>
+                <th>
+                    <% for (var i =0; i<juser.length ;  i++ ) { %>
+                    <br /><a style="color:brown" href="http://localhost:3000/modify/<%=juser[i]['_id'] %>"
+                        name="id">Modify</a>
+                    <a class="ml-3" style="color: red" href="http://localhost:3000/delete/<%=juser[i]['_id'] %>"
+                        name="id">Delete </a>
+
+                    <% } %>
+
+                </th>
+
+            </tr>
+        </tbody>
+    </table>
+
+    </div>
+    </div>
+</body>
+
+</html>

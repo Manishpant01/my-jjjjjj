@@ -1,13 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../controller/controller_r');
+const authentication = require('../auth/authentication');
 
 router.get('/',controller.adminlogin);
 router.post('/adminlog',controller.adminlog);
-router.get('/subadmin_page',controller.subadmin_page);
-router.post('/subadmin_save',controller.subadmin_save);
-router.get('/user_page',controller.user_page);
-router.post('/user_page',controller.user_save);
+router.get('/subadminpage',authentication.checktoken,controller.subadmin_page);
+router.post('/subadminsave',authentication.checktoken,controller.subadmin_save);
+router.get('/userpage',authentication.checktoken,controller.user_page);
+router.post('/usersave',authentication.checktoken,controller.user_save);
+router.get('/viewsubadmin',authentication.checktoken,controller.show_subadmindata);
+router.get('/viewuser',authentication.checktoken,controller.show_userdata);
+router.get('/delete/:id',authentication.checktoken,controller.deletedata);
+router.get('/modify/:id',authentication.checktoken,controller.modifydata);
+router.post('/modifysave',authentication.checktoken,controller.modifysave);
 
 
 module.exports = router;
