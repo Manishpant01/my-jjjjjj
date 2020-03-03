@@ -3,9 +3,11 @@ const generator = require('generate-password');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const key = require('../key');
+const bcrypt = require('bcrypt')
+SALT_WORK_FACTOR = 10;
 
 module.exports = {
-    adminlogin, reg, adminlog, subadmin_page, subadmin_save, user_page, user_save,show_subadmindata,show_userdata,deletedata,modifydata,modifysave
+    adminlogin, reg, adminlog, subadmin_page, subadmin_save, user_page, user_save, show_subadmindata, show_userdata, deletedata, modifydata, modifysave,newpass,forgotpass,forgotpage
 }
 
 function adminlogin(req, res) {
@@ -39,7 +41,7 @@ function adminlog(req, res) {
                 console.log('id:', o_id);
                 console.log('role : ' + role);
                 if ((role == 'admin') || (role == 'subadmin')) {
-                    jwt.sign({ 'id': o_id }, key.secretkey, { expiresIn: '60m' }, (err, token) => {
+                    jwt.sign({ 'id': o_id, 'role': role }, key.secretkey, { expiresIn: '60m' }, (err, token) => {
                         if (err) {
                             console.log(err);
                         }
@@ -134,7 +136,7 @@ function mail(email, password) {
     let mailOptions = {
         from: 'manishpant203@gmil.com',
         to: email,
-        subject: 'Thanku for register',
+        subject: 'Your Password is successfully Changed',
         html: 'your email is:' + email + 'your password is:' + password
     }
     transporter.sendMail(mailOptions, function (err, info) {
@@ -147,66 +149,66 @@ function mail(email, password) {
 
 
 function show_subadmindata(req, res) {
-    UserSchema.find({'role':'subadmin'},(err,data)=>{
-        if(err){}
-        else{
+    UserSchema.find({ 'role': 'subadmin' }, (err, data) => {
+        if (err) { }
+        else {
             console.log(data)
-            let juser=data
-            res.render('subadmin.html',{juser})
-        }
-    })
-    
-}
-
-
-function show_userdata(req,res){
-    UserSchema.find({'role':'user'},(err,data)=>{
-        if(err){}
-        else{
-            console.log(data)
-            let juser=data
-            res.render('subadmin.html',{juser})
+            let juser = data
+            res.render('subadmin.html', { juser })
         }
     })
 
 }
 
-function deletedata(req,res){
-    let id =  req.params.id;
+
+function show_userdata(req, res) {
+    UserSchema.find({ 'role': 'user' }, (err, data) => {
+        if (err) { }
+        else {
+            console.log(data)
+            let juser = data
+            res.render('subadmin.html', { juser })
+        }
+    })
+
+}
+
+function deletedata(req, res) {
+    let id = req.params.id;
     console.log(id);
     UserSchema.findByIdAndUpdate({ '_id': id }, { $set: { 'is_deleted': 'true' } }, (err, data) => {
         if (err) {
             res.json("err")
         }
         else {
-           res.redirect('/viewsubadmin')
+            res.redirect('/viewsubadmin')
         }
     })
 
 
 }
 
-function modifydata(req,res){
+function modifydata(req, res) {
     let id = req.params.id;
     console.log(id);
     UserSchema.findOne({ '_id': id }, (err, data) => {
-        if (err){
+        if (err) {
             console.log(err);
-        }else{
-            id=data.id
+        } else {
+            id = data.id;
             name = data.name;
             console.log(name);
             age = data.age;
             email = data.email;
             is_deleted = data.is_deleted
-            res.render('modify.html',{name,email,age,id,is_deleted})
+            res.render('modify.html', { name, email, age, id, is_deleted })
         }
-        
- })
 
-} 
+    })
 
- function modifysave (req, res) {
+}
+
+function modifysave(req, res) {
     let name = req.body.name;
     let age = req.body.age;
     let email = req.body.email;
@@ -217,15 +219,65 @@ function modifydata(req,res){
     console.log(email);
     console.log(id);
     console.log(is_deleted);
-    UserSchema.findByIdAndUpdate({'_id': id },{$set:{'name':name , 'age':age ,'email':email,'is_deleted':is_deleted}},(err,data)=>{
-        if(err){ 
+    UserSchema.findByIdAndUpdate({ '_id': id }, { $set: { 'name': name, 'age': age, 'email': email, 'is_deleted': is_deleted } }, (err, data) => {
+        if (err) {
             console.log(err);
-        }else{
-            console.log (data);
+        } else {
+            console.log(data);
             res.redirect('/viewsubadmin')
         }
     })
 
- }
+}
+
+function forgotpage(req,res){
+    res.render('forgotpass.html');
+}
+
+function forgotpass(req, res) {
+    let email = req.body.email;
+    console.log(email);
+    let passw = req.pass
+    console.log(passw);
+    let newpass = req.newpassword
+    console.log(newpass);
+    
+    UserSchema.findOneAndUpdate({ 'email': email }, { $set: {'password': newpass} }, (err, data) => {
+       if(err){
+           console.log(err);
+       }else{
+           console.log(data);
+           mail(email, passw);
+           res.redirect('/');
+       }
+
+    })
+}
+
+
+function newpass(req, res, next) {
+    var newpassword
+    let pass = generator.generate({
+        length: 10
+    });
+    
+    
+    bcrypt.genSalt(SALT_WORK_FACTOR, function (err, salt) {
+        if (err) return next(err);
+
+        bcrypt.hash(pass, salt, function (err, hash) {
+            if (err) return next(err);
+
+            newpassword = hash;
+            req.pass = pass;
+            req.newpassword=newpassword;
+            console.log(newpassword);
+            
+            next();
+
+        })
+    })
+}
+
 
 

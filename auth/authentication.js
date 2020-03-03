@@ -22,6 +22,16 @@ function checktoken(req, res,next) {
     }
 }
 
+function checkauth (req,res,next){
+    let token = req.cookies.token;
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>:'+token);
+    if(token.role == 'admin'){
+        next()
+    }else{
+        res.render('auth.html')
+    }
+}
+
 module.exports  = {
-    checktoken
+    checktoken,checkauth
 }
