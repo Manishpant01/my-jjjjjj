@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt')
 SALT_WORK_FACTOR = 10;
 
 module.exports = {
-    adminlogin, reg, adminlog, subadmin_page, subadmin_save, user_page, user_save, show_subadmindata, show_userdata, deletedata, modifydata, modifysave,newpass,forgotpass,forgotpage
+    adminlogin, reg, adminlog, subadmin_page, subadmin_save, user_page, user_save, show_subadmindata, show_userdata, deletedata, modifydata, modifysave, newpass, forgotpass, forgotpage
 }
 
 function adminlogin(req, res) {
@@ -230,7 +230,7 @@ function modifysave(req, res) {
 
 }
 
-function forgotpage(req,res){
+function forgotpage(req, res) {
     res.render('forgotpass.html');
 }
 
@@ -241,15 +241,15 @@ function forgotpass(req, res) {
     console.log(passw);
     let newpass = req.newpassword
     console.log(newpass);
-    
-    UserSchema.findOneAndUpdate({ 'email': email }, { $set: {'password': newpass} }, (err, data) => {
-       if(err){
-           console.log(err);
-       }else{
-           console.log(data);
-           mail(email, passw);
-           res.redirect('/');
-       }
+
+    UserSchema.findOneAndUpdate({ 'email': email }, { $set: { 'password': newpass } }, (err, data) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(data);
+            mail(email, passw);
+            res.redirect('/');
+        }
 
     })
 }
@@ -260,8 +260,8 @@ function newpass(req, res, next) {
     let pass = generator.generate({
         length: 10
     });
-    
-    
+
+
     bcrypt.genSalt(SALT_WORK_FACTOR, function (err, salt) {
         if (err) return next(err);
 
@@ -270,9 +270,9 @@ function newpass(req, res, next) {
 
             newpassword = hash;
             req.pass = pass;
-            req.newpassword=newpassword;
+            req.newpassword = newpassword;
             console.log(newpassword);
-            
+
             next();
 
         })
