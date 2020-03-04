@@ -3,7 +3,7 @@ const router = express.Router();
 const controller = require('../controller/controller_r');
 const authentication = require('../auth/authentication');
 
-router.get('/',controller.adminlogin);
+router.get('/',authentication.checktoken,controller.adminlogin);
 router.post('/adminlog',controller.adminlog);
 router.get('/subadminpage',authentication.checktoken,controller.subadmin_page);
 router.post('/subadminsave',authentication.checktoken,controller.subadmin_save);
@@ -16,5 +16,6 @@ router.get('/modify/:id',authentication.checktoken,authentication.checkauth,cont
 router.post('/modifysave',authentication.checktoken,controller.modifysave);
 router.get('/forgotpass',authentication.checktoken,controller.forgotpage);
 router.post('/forgot',controller.newpass,controller.forgotpass);
+router.get('/logout',authentication.checktoken,controller.logout);
 
 module.exports = router;

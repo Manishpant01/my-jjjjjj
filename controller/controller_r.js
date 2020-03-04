@@ -7,11 +7,11 @@ const bcrypt = require('bcrypt')
 SALT_WORK_FACTOR = 10;
 
 module.exports = {
-    adminlogin, reg, adminlog, subadmin_page, subadmin_save, user_page, user_save, show_subadmindata, show_userdata, deletedata, modifydata, modifysave, newpass, forgotpass, forgotpage
+    adminlogin, reg, adminlog, subadmin_page, subadmin_save, user_page, user_save, show_subadmindata, show_userdata, deletedata, modifydata, modifysave, newpass, forgotpass, forgotpage,logout
 }
 
 function adminlogin(req, res) {
-    res.render('login.html');
+    res.render('index.html');
 }
 
 function adminlog(req, res) {
@@ -270,7 +270,7 @@ function newpass(req, res, next) {
 
             newpassword = hash;
             req.pass = pass;
-            req.newpassword = newpassword;
+            req.newpassword = newpassword;  
             console.log(newpassword);
 
             next();
@@ -278,6 +278,6 @@ function newpass(req, res, next) {
         })
     })
 }
-
-
-
+function logout(req,res){
+    res.clearCookie('token').redirect('/')
+}
