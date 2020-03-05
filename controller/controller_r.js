@@ -3,11 +3,35 @@ const generator = require('generate-password');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const key = require('../key');
+const alert = require('alert-node');
 const bcrypt = require('bcrypt')
 SALT_WORK_FACTOR = 10;
 
 module.exports = {
-    adminlogin, reg, adminlog, subadmin_page, subadmin_save, user_page, user_save, show_subadmindata, show_userdata, deletedata, modifydata, modifysave, newpass, forgotpass, forgotpage,logout
+    adminlogin,
+    reg,
+    adminlog,
+    subadmin_page,
+    subadmin_save,
+    user_page,
+    user_save,
+    show_subadmindata,
+    show_userdata,
+    deletedata,
+    modifydata,
+    modifysave,
+    newpass,
+    //forgotpass,
+    linkmail,
+    findrole,
+    forgotpage,
+    logout,
+    adchange,
+    subadchange,
+    hashpass,
+    adminchangepage,
+    adminchange,
+    dashboard,bylinkpage,bylinkchange
 }
 
 function adminlogin(req, res) {
@@ -181,7 +205,13 @@ function deletedata(req, res) {
             res.json("err")
         }
         else {
-            res.redirect('/viewsubadmin')
+            let role = data.role;
+            console.log(role);
+            if (role == 'subadmin') {
+                res.redirect('/viewsubadmin')
+            } else {
+                res.redirect('/viewuser')
+            }
         }
     })
 
@@ -223,8 +253,14 @@ function modifysave(req, res) {
         if (err) {
             console.log(err);
         } else {
-            console.log(data);
-            res.redirect('/viewsubadmin')
+            let role = data.role;
+
+            console.log(role);
+            if (role == 'subadmin') {
+                res.redirect('/viewsubadmin')
+            } else {
+                res.redirect('/viewuser')
+            }
         }
     })
 
@@ -234,23 +270,53 @@ function forgotpage(req, res) {
     res.render('forgotpass.html');
 }
 
-function forgotpass(req, res) {
-    let email = req.body.email;
-    console.log(email);
-    let passw = req.pass
-    console.log(passw);
-    let newpass = req.newpassword
-    console.log(newpass);
+// function forgotpass(req, res) {
 
-    UserSchema.findOneAndUpdate({ 'email': email }, { $set: { 'password': newpass } }, (err, data) => {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log(data);
-            mail(email, passw);
+//     let email = req.body.email;
+//     console.log(email);
+//     let passw = req.pass
+//     console.log(passw);
+//     let newpass = req.newpassword
+//     console.log(newpass);
+//     let role = req.role
+//     console.log(role);
+//     if (role == 'user') {
+
+//         UserSchema.findOneAndUpdate({ 'email': email }, { $set: { 'password': newpass } }, (err, data) => {
+//             if (err) {
+//                 console.log(err);
+//             } else {
+//                 console.log(data);
+//                 mail(email, passw);
+//                 res.redirect('/');
+//             }
+
+//         })
+//     } else {
+//         alert('Only user Can Change');
+//         res.redirect('/');
+//     }
+// }
+
+function findrole(req, res, next) {
+    let mail = req.body.email;
+    console.log(mail);
+    UserSchema.findOne({ 'email': mail }, (err, data) => {
+
+        if (data == null) {
+            alert('You Enter a wrong mail');
             res.redirect('/');
+        } else {
+            let mail = data.email;
+            req.email = mail;
+            console.log(mail);
+            role = data.role;
+            console.log(role);
+            req.role = role;
+            let id = data.id;
+            req.O_id = id;
+            next()
         }
-
     })
 }
 
@@ -270,7 +336,7 @@ function newpass(req, res, next) {
 
             newpassword = hash;
             req.pass = pass;
-            req.newpassword = newpassword;  
+            req.newpassword = newpassword;
             console.log(newpassword);
 
             next();
@@ -278,6 +344,198 @@ function newpass(req, res, next) {
         })
     })
 }
-function logout(req,res){
+function logout(req, res) {
     res.clearCookie('token').redirect('/')
 }
+
+
+function adchange(req, res) {
+    res.render('adchange.html');
+}
+
+function subadchange(req, res) {
+    let name = req.body.name;
+    console.log(name);
+    let pass = req.body.pass;
+
+    console.log(pass);
+    let email = req.body.email;
+    let hashpass = req.newpassword;
+    console.log(hashpass);
+    UserSchema.findOneAndUpdate({ 'email': email }, { $set: { 'password': hashpass} }, (err, data) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(data);
+            mail(email, pass);
+            res.render('changesucc.html');
+        }
+    })
+}
+
+function hashpass(req, res, next) {
+    let passw = req.body.pass;
+    console.log(passw)
+    bcrypt.genSalt(SALT_WORK_FACTOR, function (err, salt) {
+        if (err) return next(err);
+
+        bcrypt.hash(passw, salt, function (err, hash) {
+            if (err) return next(err);
+
+            newpassword = hash;
+            req.newpassword = newpassword;
+            console.log(newpassword);
+
+            next();
+
+        })
+    })
+}
+
+function adminchangepage(req, res) {
+    res.render('adminchange.html');
+}
+
+
+function adminchange(req, res) {
+    let email = req.body.email;
+    console.log(email);
+    let oldpass = req.body.oldpass;
+    console.log(oldpass);
+    let newpass = req.body.pass;
+    let hashpass = req.newpassword
+    UserSchema.findOne({ 'email': email }, (err, data) => {
+        if (err) {
+            console.log(err)
+        } else if (data == null) {
+            console.log('username & password is wrong');
+            res.render('login.html');
+        } else {
+            data.comparePassword(oldpass, function (err, isMatch) {
+                if (err) throw err;
+                else {
+                    console.log('Password:', isMatch);
+                    if (isMatch) {
+                        data.password=newpass;
+                        data.save((err)=>{
+                            if(err){
+
+                            }
+                            else{
+                                res.render('index.html')
+                            }
+                        });
+                    } else {
+                        alert('Old Password Is Wrong');
+                        res.redirect('/adminchangepage');
+                    }
+                }
+            })
+        }
+    })
+}
+function dashboard(req, res) {
+    res.render('index.html');
+}
+
+function linkmail(req, res) {
+    let email = req.email;
+    console.log(email);
+    let role = req.role;
+    console.log(role);
+    console.log('email recived');
+    let o_id = req.O_id;
+    if ((role == 'admin') || (role == 'user')) {
+        jwt.sign({ 'id': o_id }, key.secretkey, { expiresIn: '1d' }, (err, token) => {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(token);
+                 sendmail(email, token,function(err,result){
+                        if(err){
+
+                        }
+                        else{
+
+                            console.log(result);
+                            res.redirect('/')
+                            alert("Password Reset Link Has Been Send")
+                            UserSchema.findByIdAndUpdate({"_id":o_id},{$set:{'resetlink':token}},(err,result)=>{
+                                if(err){
+
+                                }else{
+                                    console.log(result);
+                                }
+                            })
+                        }
+                })
+
+            }
+        })
+    } else {
+        alert('only User & Admin can change');
+    }
+
+}
+
+function sendmail(email, link, cb) {
+
+    let mailOptions = {
+        from: 'manishpant203@gmil.com',
+        to: email,
+        subject: 'your password change requs',
+        html: '<p>Click <a href="http://localhost:3000/linkchangepage/'+link+'">here</a> to reset your password</p>'
+    }
+
+        transporter.sendMail(mailOptions, function (err, info) {
+            if (err)
+                cb(err)
+            else
+                cb(null,true);
+        });
+    
+
+};
+function bylinkpage(req,res){
+    let token=req.params.id;
+    console.log(token);
+    jwt.verify(token, key.secretkey,(err, data)=>{
+        if(err){
+            console.log(err);
+        }else{
+            console.log(data);
+            let id = data.id;
+            console.log("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",id);
+            res.render('bylinkchange.html',{id,token});
+        }
+    })
+    
+}
+function bylinkchange(req,res){
+    let email = req.body.id;
+    console.log(email);
+    let token=req.body.token;
+    
+    let pass=req.body.password;
+    console.log(pass);
+    UserSchema.findOne({ '_id': email}, (err, data)=>{
+        if(err){
+
+        }
+        else{
+            console.log(data);
+            data.password=pass;
+            data.resetlink=undefined;
+            data.save((err)=>{
+                if(err){}
+                else{
+                    res.redirect('/')
+                    alert("Password Changed")
+                }
+            })
+        }
+    })
+
+}
+
+

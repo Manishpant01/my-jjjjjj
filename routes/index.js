@@ -14,8 +14,15 @@ router.get('/viewuser',authentication.checktoken,controller.show_userdata);
 router.get('/delete/:id',authentication.checktoken,authentication.checkauth,controller.deletedata);
 router.get('/modify/:id',authentication.checktoken,authentication.checkauth,controller.modifydata);
 router.post('/modifysave',authentication.checktoken,controller.modifysave);
-router.get('/forgotpass',authentication.checktoken,controller.forgotpage);
-router.post('/forgot',controller.newpass,controller.forgotpass);
+router.get('/forgotpass',controller.forgotpage);
+router.post('/forgot',controller.newpass,controller.findrole,controller.linkmail);
 router.get('/logout',authentication.checktoken,controller.logout);
+router.get('/subadminchange',authentication.checktoken,authentication.checkauth,controller.adchange);
+router.post('/subadchange',controller.hashpass,controller.subadchange);
+router.get('/adminchangepage',authentication.checktoken,authentication.checkauth,controller.adminchangepage);
+router.post('/adminchange',controller.adminchange);
+router.get('/dashboard',authentication.checktoken,controller.dashboard);
+router.get('/linkchangepage/:id',controller.bylinkpage);
+router.post('/linkchange',controller.bylinkchange);
 
 module.exports = router;
