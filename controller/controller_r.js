@@ -484,7 +484,7 @@ function sendmail(email, link, cb) {
         from: 'manishpant203@gmil.com',
         to: email,
         subject: 'your password change requs',
-        html: '<p>Click <a href="http://localhost:3000/linkchangepage/'+link+'">here</a> to reset your password</p>'
+        html: '<p>Click <a href="http://adminmanish/linkchangepage/'+link+'">here</a> to reset your password</p>'
     }
 
         transporter.sendMail(mailOptions, function (err, info) {
