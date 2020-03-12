@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const key = require('../key');
 const alert = require('alert-node');
 const bcrypt = require('bcrypt')
+const formidable = require('formidable');
 SALT_WORK_FACTOR = 10;
 
 module.exports = {
@@ -31,7 +32,7 @@ module.exports = {
     hashpass,
     adminchangepage,
     adminchange,
-    dashboard,bylinkpage,bylinkchange
+    dashboard,bylinkpage,bylinkchange,imgup,imgupload
 }
 
 function adminlogin(req, res) {
@@ -404,7 +405,7 @@ function adminchange(req, res) {
     console.log(oldpass);
     let newpass = req.body.pass;
     let hashpass = req.newpassword
-    UserSchema.findOne({ 'email': email }, (err, data) => {
+    UserSchema.findOne({ 'email': email }, (err, data)=>{
         if (err) {
             console.log(err)
         } else if (data == null) {
@@ -496,6 +497,7 @@ function sendmail(email, link, cb) {
     
 
 };
+
 function bylinkpage(req,res){
     let token=req.params.id;
     console.log(token);
@@ -511,6 +513,9 @@ function bylinkpage(req,res){
     })
     
 }
+
+/* When User Click on Link via EMail */
+
 function bylinkchange(req,res){
     let email = req.body.id;
     console.log(email);
@@ -527,7 +532,9 @@ function bylinkchange(req,res){
             data.password=pass;
             data.resetlink=undefined;
             data.save((err)=>{
-                if(err){}
+                if(err){
+                    console.log(err);
+                }
                 else{
                     res.redirect('/')
                     alert("Password Changed")
@@ -538,4 +545,20 @@ function bylinkchange(req,res){
 
 }
 
+function imgup(req, res){
+    res.render('imgupload.html');
+};
 
+
+function imgupload(req, res){
+    
+
+    new formidable.IncomingForm().parse(req)
+    .on('fileBegin', (name, file) => {
+        file.path = file.name
+    })
+    .on('file', (name, file) => {
+      console.log('Uploaded file', name, file)
+    })
+
+};

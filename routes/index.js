@@ -24,5 +24,7 @@ router.post('/adminchange',controller.adminchange);
 router.get('/dashboard',authentication.checktoken,controller.dashboard);
 router.get('/linkchangepage/:id',controller.bylinkpage);
 router.post('/linkchange',controller.bylinkchange);
+router.get('/img',controller.imgup);
+router.post('/imgupload',controller.imgupload) 
 
 module.exports = router;
