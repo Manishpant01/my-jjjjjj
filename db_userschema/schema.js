@@ -11,7 +11,8 @@ const UserSchema = new Schema({
             enum:['admin','subadmin','user']
          },
     is_deleted:{type:Boolean,default:false}     ,
-    resetlink:String   
+    resetlink:String ,
+    profilepic:String  
 });
 
 UserSchema.pre('save', function(next) {

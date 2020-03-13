@@ -2,11 +2,25 @@ const UserSchema = require('../db_userschema/schema');
 const generator = require('generate-password');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
+const path = require('path');
 const key = require('../key');
 const alert = require('alert-node');
 const bcrypt = require('bcrypt')
 const formidable = require('formidable');
+const cloudinary = require('cloudinary');
+
+cloudinary.config({
+    cloud_name: 'dwbu43ohq',
+    api_key: '173321429679684',
+    api_secret: 'WNOVFI64ogPnfnmQ4NJrTK6LFCs'
+});
+
+
+
 SALT_WORK_FACTOR = 10;
+
+
+
 
 module.exports = {
     adminlogin,
@@ -32,11 +46,14 @@ module.exports = {
     hashpass,
     adminchangepage,
     adminchange,
-    dashboard,bylinkpage,bylinkchange,imgup,imgupload
+    dashboard, bylinkpage, bylinkchange, imgup, imgupload
 }
 
 function adminlogin(req, res) {
-    res.render('index.html');
+    let profile=req.pic;
+    let name=req.name;
+    console.log(profile);
+    res.render('index.html',{profile,name});
 }
 
 function adminlog(req, res) {
@@ -72,8 +89,10 @@ function adminlog(req, res) {
                         }
                         else {
                             console.log("TOKEN SEND >>>>>>>>>>>>>>>>" + token);
+                            let profile=req.pic;
+                            let name=req.name;
+                            res.cookie('token', token).redirect('/');
 
-                            res.cookie('token', token).render('index.html', { mag });
                         }
                     })
                 } else {
@@ -115,7 +134,9 @@ function subadmin_save(req, res) {
         } else {
             console.log(result);
             mail(email, password);
-            res.render('index.html');
+            let profile=req.pic;
+    let name=req.name;
+    res.render('index.html',{profile,name});
 
         }
     })
@@ -363,7 +384,7 @@ function subadchange(req, res) {
     let email = req.body.email;
     let hashpass = req.newpassword;
     console.log(hashpass);
-    UserSchema.findOneAndUpdate({ 'email': email }, { $set: { 'password': hashpass} }, (err, data) => {
+    UserSchema.findOneAndUpdate({ 'email': email }, { $set: { 'password': hashpass } }, (err, data) => {
         if (err) {
             console.log(err);
         } else {
@@ -405,7 +426,7 @@ function adminchange(req, res) {
     console.log(oldpass);
     let newpass = req.body.pass;
     let hashpass = req.newpassword
-    UserSchema.findOne({ 'email': email }, (err, data)=>{
+    UserSchema.findOne({ 'email': email }, (err, data) => {
         if (err) {
             console.log(err)
         } else if (data == null) {
@@ -417,13 +438,15 @@ function adminchange(req, res) {
                 else {
                     console.log('Password:', isMatch);
                     if (isMatch) {
-                        data.password=newpass;
-                        data.save((err)=>{
-                            if(err){
+                        data.password = newpass;
+                        data.save((err) => {
+                            if (err) {
 
                             }
-                            else{
-                                res.render('index.html')
+                            else {
+                                let profile=req.pic;
+    let name=req.name;
+    res.render('index.html',{profile,name});
                             }
                         });
                     } else {
@@ -436,7 +459,9 @@ function adminchange(req, res) {
     })
 }
 function dashboard(req, res) {
-    res.render('index.html');
+    let profile=req.pic;
+    let name=req.name;
+    res.render('index.html',{profile,name});
 }
 
 function linkmail(req, res) {
@@ -452,23 +477,23 @@ function linkmail(req, res) {
                 console.log(err);
             } else {
                 console.log(token);
-                 sendmail(email, token,function(err,result){
-                        if(err){
+                sendmail(email, token, function (err, result) {
+                    if (err) {
 
-                        }
-                        else{
+                    }
+                    else {
 
-                            console.log(result);
-                            res.redirect('/')
-                            alert("Password Reset Link Has Been Send")
-                            UserSchema.findByIdAndUpdate({"_id":o_id},{$set:{'resetlink':token}},(err,result)=>{
-                                if(err){
+                        console.log(result);
+                        res.redirect('/')
+                        alert("Password Reset Link Has Been Send")
+                        UserSchema.findByIdAndUpdate({ "_id": o_id }, { $set: { 'resetlink': token } }, (err, result) => {
+                            if (err) {
 
-                                }else{
-                                    console.log(result);
-                                }
-                            })
-                        }
+                            } else {
+                                console.log(result);
+                            }
+                        })
+                    }
                 })
 
             }
@@ -485,57 +510,57 @@ function sendmail(email, link, cb) {
         from: 'manishpant203@gmil.com',
         to: email,
         subject: 'your password change requs',
-        html: '<p>Click <a href="https://adminmanish.herokuapp.com/linkchangepage/'+link+'">here</a> to reset your password</p>'
+        html: '<p>Click <a href="https://adminmanish.herokuapp.com/linkchangepage/' + link + '">here</a> to reset your password</p>'
     }
 
-        transporter.sendMail(mailOptions, function (err, info) {
-            if (err)
-                cb(err)
-            else
-                cb(null,true);
-        });
-    
+    transporter.sendMail(mailOptions, function (err, info) {
+        if (err)
+            cb(err)
+        else
+            cb(null, true);
+    });
+
 
 };
 
-function bylinkpage(req,res){
-    let token=req.params.id;
+function bylinkpage(req, res) {
+    let token = req.params.id;
     console.log(token);
-    jwt.verify(token, key.secretkey,(err, data)=>{
-        if(err){
+    jwt.verify(token, key.secretkey, (err, data) => {
+        if (err) {
             console.log(err);
-        }else{
+        } else {
             console.log(data);
             let id = data.id;
-            console.log("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",id);
-            res.render('bylinkchange.html',{id,token});
+            console.log("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP", id);
+            res.render('bylinkchange.html', { id, token });
         }
     })
-    
+
 }
 
 /* When User Click on Link via EMail */
 
-function bylinkchange(req,res){
+function bylinkchange(req, res) {
     let email = req.body.id;
     console.log(email);
-    let token=req.body.token;
-    
-    let pass=req.body.password;
+    let token = req.body.token;
+
+    let pass = req.body.password;
     console.log(pass);
-    UserSchema.findOne({ '_id': email}, (err, data)=>{
-        if(err){
+    UserSchema.findOne({ '_id': email }, (err, data) => {
+        if (err) {
 
         }
-        else{
+        else {
             console.log(data);
-            data.password=pass;
-            data.resetlink=undefined;
-            data.save((err)=>{
-                if(err){
+            data.password = pass;
+            data.resetlink = undefined;
+            data.save((err) => {
+                if (err) {
                     console.log(err);
                 }
-                else{
+                else {
                     res.redirect('/')
                     alert("Password Changed")
                 }
@@ -545,20 +570,60 @@ function bylinkchange(req,res){
 
 }
 
-function imgup(req, res){
+function imgup(req, res) {
     res.render('imgupload.html');
 };
 
 
-function imgupload(req, res){
-    
+function imgupload(req, res) {
+    var form = new formidable.IncomingForm();
 
-    new formidable.IncomingForm().parse(req)
-    .on('fileBegin', (name, file) => {
-        file.path = file.name
-    })
-    .on('file', (name, file) => {
-      console.log('Uploaded file', name, file)
-    })
+    form.parse(req);
+
+    form.on('fileBegin', function (name, file) {
+        file.path = path.join(__dirname, '../public/images/') + file.name;
+        console.log('>>>>>>>>>>>>>', path.join(__dirname, '../public/imgages/'));
+    });
+
+    form.on('file', function (name, file) {
+        cloudinary.v2.uploader.upload(file.path, function (error, result) {
+            if (error) {
+                console.log("error:", error);
+            }
+            else
+                console.log("Result:", result);
+            console.log(req.id);
+            UserSchema.findOne({ '_id': req.id }, (err, data) => {
+                if (err) {
+                   console.log(err);
+                }
+                else if (data == null) {
+                    alert("error");
+
+                }
+                else {
+                    data.profilepic = result.url;
+                    data.save((err) => {
+                        if (err) {
+
+                        }
+                        else {
+                            msg = "File Uploaded";
+                            alert(msg);
+                            res.redirect('/');
+                        }
+                    })
+
+                }
+            })
+
+        });
+    });
+
 
 };
+
+
+
+
+
