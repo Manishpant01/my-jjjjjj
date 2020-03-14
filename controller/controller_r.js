@@ -50,10 +50,10 @@ module.exports = {
 }
 
 function adminlogin(req, res) {
-    let profile=req.pic;
-    let name=req.name;
+    let profile = req.pic;
+    let name = req.name;
     console.log(profile);
-    res.render('index.html',{profile,name});
+    res.render('index.html', { profile, name });
 }
 
 function adminlog(req, res) {
@@ -89,8 +89,8 @@ function adminlog(req, res) {
                         }
                         else {
                             console.log("TOKEN SEND >>>>>>>>>>>>>>>>" + token);
-                            let profile=req.pic;
-                            let name=req.name;
+                            let profile = req.pic;
+                            let name = req.name;
                             res.cookie('token', token).redirect('/');
 
                         }
@@ -134,9 +134,9 @@ function subadmin_save(req, res) {
         } else {
             console.log(result);
             mail(email, password);
-            let profile=req.pic;
-    let name=req.name;
-    res.render('index.html',{profile,name});
+            let profile = req.pic;
+            let name = req.name;
+            res.render('index.html', { profile, name });
 
         }
     })
@@ -444,9 +444,9 @@ function adminchange(req, res) {
 
                             }
                             else {
-                                let profile=req.pic;
-    let name=req.name;
-    res.render('index.html',{profile,name});
+                                let profile = req.pic;
+                                let name = req.name;
+                                res.render('index.html', { profile, name });
                             }
                         });
                     } else {
@@ -459,9 +459,9 @@ function adminchange(req, res) {
     })
 }
 function dashboard(req, res) {
-    let profile=req.pic;
-    let name=req.name;
-    res.render('index.html',{profile,name});
+    let profile = req.pic;
+    let name = req.name;
+    res.render('index.html', { profile, name });
 }
 
 function linkmail(req, res) {
@@ -553,18 +553,25 @@ function bylinkchange(req, res) {
 
         }
         else {
-            console.log(data);
-            data.password = pass;
-            data.resetlink = undefined;
-            data.save((err) => {
-                if (err) {
-                    console.log(err);
-                }
-                else {
-                    res.redirect('/')
-                    alert("Password Changed")
-                }
-            })
+            let token = data.resetlink;
+            console.log("my token",token);
+            if((token == undefined)||(token == null)){
+                res.json('Link expired')
+                
+            }else{
+                console.log(data);
+                data.password = pass;
+                data.resetlink = undefined;
+                data.save((err) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                    else {
+                        res.redirect('/')
+                        alert("Password Changed")
+                    }
+                })
+            }
         }
     })
 
@@ -595,7 +602,7 @@ function imgupload(req, res) {
             console.log(req.id);
             UserSchema.findOne({ '_id': req.id }, (err, data) => {
                 if (err) {
-                   console.log(err);
+                    console.log(err);
                 }
                 else if (data == null) {
                     alert("error");

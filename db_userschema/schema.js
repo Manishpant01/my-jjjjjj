@@ -10,7 +10,7 @@ const UserSchema = new Schema({
     role:{type:String,
             enum:['admin','subadmin','user']
          },
-    is_deleted:{type:Boolean,default:false}     ,
+    is_deleted:{type:Boolean,default:false},
     resetlink:String ,
     profilepic:String  
 });
