@@ -68,7 +68,7 @@ function adminlog(req, res) {
         } else if (data == null) {
             console.log('username & password is wrong');
             mag = "Please Enter Valid Information"
-            res.render('login.html',{mag});
+            res.render('login.html', { mag });
         }
         else {
             data.comparePassword(password, function (err, isMatch) {
@@ -76,7 +76,7 @@ function adminlog(req, res) {
                 else {
                     console.log('Password:', isMatch);
                     if (isMatch == false) {
-                        res.render('login.html',{mag});
+                        res.render('login.html', { mag });
                     }
                 }
                 let o_id = data.id;
@@ -98,7 +98,7 @@ function adminlog(req, res) {
                     })
                 } else {
                     mag = "User can not login from admin pannel"
-                    res.render('login.html',{mag});
+                    res.render('login.html', { mag });
                 }
             })
         }
@@ -160,11 +160,11 @@ function user_save(req, res) {
     console.log(name);
     console.log(age);
     console.log(email);
-    if ((age == '') || (name == '') || (email == '')){
+    if ((age == '') || (name == '') || (email == '')) {
         res.json("please enter valid information");
-       
+
     } else {
-        
+
         let password = generator.generate({
             length: 10
         });
@@ -287,8 +287,8 @@ function modifysave(req, res) {
     if ((age == '') || (name == '')) {
         res.json("Enter valid informatio")
     } else {
-       
-        UserSchema.findByIdAndUpdate({ '_id': id }, { $set: { 'name': name, 'age': age,  'is_deleted': is_deleted } }, (err, data) => {
+
+        UserSchema.findByIdAndUpdate({ '_id': id }, { $set: { 'name': name, 'age': age, 'is_deleted': is_deleted } }, (err, data) => {
             if (err) {
                 console.log(err);
             } else {
@@ -307,7 +307,7 @@ function modifysave(req, res) {
 }
 
 function forgotpage(req, res) {
-    res.render('forgotpass.html');
+    res.render('forgotpass.html', { mag });
 }
 
 // function forgotpass(req, res) {
@@ -345,7 +345,8 @@ function findrole(req, res, next) {
 
         if (data == null) {
             alert('You Enter a wrong mail');
-            res.redirect('/');
+            mag = "You Enter a wrong mail"
+            res.render('forgotpass.html',{mag});
         } else {
             let mail = data.email;
             req.email = mail;
@@ -390,7 +391,7 @@ function logout(req, res) {
 
 
 function adchange(req, res) {
-    res.render('adchange.html',{mag});
+    res.render('adchange.html', { mag });
 }
 
 function subadchange(req, res) {
@@ -405,11 +406,11 @@ function subadchange(req, res) {
     UserSchema.findOneAndUpdate({ 'email': email }, { $set: { 'password': hashpass } }, (err, data) => {
         if (err) {
             console.log(err);
-        } else if(data == null){
+        } else if (data == null) {
             console.log('username & password is wrong');
             let mag = "Enter valid information"
-            res.render('adchange.html',{mag});
-        }else{
+            res.render('adchange.html', { mag });
+        } else {
             console.log(data);
             mail(email, pass);
             res.render('changesucc.html');
@@ -437,7 +438,7 @@ function hashpass(req, res, next) {
 }
 
 function adminchangepage(req, res) {
-    res.render('adminchange.html',{mag});
+    res.render('adminchange.html', { mag });
 }
 
 
@@ -454,7 +455,7 @@ function adminchange(req, res) {
         } else if (data == null) {
             console.log('username & password is wrong');
             let mag = "Enter valid information"
-            res.render('adminchange.html',{mag});
+            res.render('adminchange.html', { mag });
         } else {
             data.comparePassword(oldpass, function (err, isMatch) {
                 if (err) throw err;
@@ -494,6 +495,8 @@ function linkmail(req, res) {
     console.log(role);
     console.log('email recived');
     let o_id = req.O_id;
+
+
     if ((role == 'admin') || (role == 'user')) {
         jwt.sign({ 'id': o_id }, key.secretkey, { expiresIn: '1d' }, (err, token) => {
             if (err) {
@@ -524,8 +527,9 @@ function linkmail(req, res) {
     } else {
         alert('only User & Admin can change');
     }
-
 }
+
+
 
 function sendmail(email, link, cb) {
 
