@@ -594,7 +594,7 @@ function imgupload(req, res) {
 
     form.on('file', function (name, file) {
         cloudinary.v2.uploader.upload(file.path, function (error, result) {
-            console.log(result);
+            console.log("my result",result);
             if (error) {
                 console.log("error:", error);
             }
