@@ -609,7 +609,9 @@ function imgupload(req, res) {
 
                 }
                 else {
-                    data.profilepic = result.url;
+                    console.log('hello');
+                    let url = result.url;
+                    data.profilepic = url;
                     data.save((err) => {
                         if (err) {
 
