@@ -29,11 +29,16 @@
                 </div><br>
                 <div class="form-group form-control">
                     <label>Email :</label>
-                    <input type="email" name="email"  value="<%=email %>">
+                    <input type="email" name="email"  value="<%=email %>" disabled>
                 </div><br>
                 <div class="form-group form-control">
                     <label>is_deleted :</label>
-                    <input type="" name="is_deleted"  value="<%=is_deleted %>">
+                    <select  name="is_deleted">
+                        <option value="false">false</option>
+                        <option value="true">true</option>
+                        
+                      </select>
+                    <!-- <input type="" name="is_deleted"  value="<%=is_deleted %>"> -->
                 </div><br>
                 <button class="btn btn-success" type="submit">submit</button>
                

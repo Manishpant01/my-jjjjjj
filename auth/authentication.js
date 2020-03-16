@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const key = require('../key');
 const UserSchema = require('../db_userschema/schema');
+let mag  = "";
 
 
 
@@ -11,11 +12,11 @@ function checktoken(req, res, next) {
 
     if ((token == undefined) || (token == null)) {
 
-        res.render('login.html');
+        res.render('login.html',{mag});
     } else {
         jwt.verify(token, key.secretkey, function (err, data) {
             if (err) {
-                res.render('login.html')
+                res.render('login.html',{mag})
             } else {
                 console.log(data);
                 let type = data.role;

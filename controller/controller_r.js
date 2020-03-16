@@ -8,6 +8,7 @@ const alert = require('alert-node');
 const bcrypt = require('bcrypt')
 const formidable = require('formidable');
 const cloudinary = require('cloudinary');
+let mag = "";
 
 cloudinary.config({
     cloud_name: 'dwbu43ohq',
@@ -66,7 +67,8 @@ function adminlog(req, res) {
             console.log(err);
         } else if (data == null) {
             console.log('username & password is wrong');
-            res.render('login.html');
+            mag = "Please Enter Valid Information"
+            res.render('login.html',{mag});
         }
         else {
             data.comparePassword(password, function (err, isMatch) {
@@ -74,12 +76,11 @@ function adminlog(req, res) {
                 else {
                     console.log('Password:', isMatch);
                     if (isMatch == false) {
-                        res.render('login.html');
+                        res.render('login.html',{mag});
                     }
                 }
                 let o_id = data.id;
                 let role = data.role;
-                let mag = role
                 console.log('id:', o_id);
                 console.log('role : ' + role);
                 if ((role == 'admin') || (role == 'subadmin')) {
@@ -96,7 +97,8 @@ function adminlog(req, res) {
                         }
                     })
                 } else {
-                    res.render('login.html');
+                    mag = "User can not login from admin pannel"
+                    res.render('login.html',{mag});
                 }
             })
         }
@@ -120,26 +122,31 @@ function subadmin_save(req, res) {
     let Age = req.body.age;
     let email = req.body.email;
     console.log(Name);
-    console.log(Age);
+    console.log(">>>>>>>:", Age);
     console.log(email);
+    if ((Age == '') || (Name == '') || (email == '')) {
 
-    let password = generator.generate({
-        length: 10
-    });
-    console.log(password);
-    let schemaName = new UserSchema({ 'name': Name, 'age': Age, 'email': email, 'password': password, 'role': 'subadmin' });
-    schemaName.save(function (err, result) {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log(result);
-            mail(email, password);
-            let profile = req.pic;
-            let name = req.name;
-            res.render('index.html', { profile, name });
+        res.json("please enter valid information");
+    } else {
 
-        }
-    })
+        let password = generator.generate({
+            length: 10
+        });
+        console.log(password);
+        let schemaName = new UserSchema({ 'name': Name, 'age': Age, 'email': email, 'password': password, 'role': 'subadmin' });
+        schemaName.save(function (err, result) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(result);
+                mail(email, password);
+                let profile = req.pic;
+                let name = req.name;
+                res.render('index.html', { profile, name });
+
+            }
+        })
+    }
 }
 
 function user_page(req, res) {
@@ -153,21 +160,27 @@ function user_save(req, res) {
     console.log(name);
     console.log(age);
     console.log(email);
-    let password = generator.generate({
-        length: 10
-    });
-    console.log(password);
-    let schemaName = new UserSchema({ 'name': name, 'age': age, 'email': email, 'password': password, 'role': 'user' });
-    schemaName.save(function (err, result) {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log(result);
-            mail(email, password);
-            res.render('index.html');
+    if ((age == '') || (name == '') || (email == '')){
+        res.json("please enter valid information");
+       
+    } else {
+        
+        let password = generator.generate({
+            length: 10
+        });
+        console.log(password);
+        let schemaName = new UserSchema({ 'name': name, 'age': age, 'email': email, 'password': password, 'role': 'user' });
+        schemaName.save(function (err, result) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(result);
+                mail(email, password);
+                res.redirect('/');
 
-        }
-    })
+            }
+        })
+    }
 }
 let transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -271,20 +284,25 @@ function modifysave(req, res) {
     console.log(email);
     console.log(id);
     console.log(is_deleted);
-    UserSchema.findByIdAndUpdate({ '_id': id }, { $set: { 'name': name, 'age': age, 'email': email, 'is_deleted': is_deleted } }, (err, data) => {
-        if (err) {
-            console.log(err);
-        } else {
-            let role = data.role;
-
-            console.log(role);
-            if (role == 'subadmin') {
-                res.redirect('/viewsubadmin')
+    if ((age == '') || (name == '')) {
+        res.json("Enter valid informatio")
+    } else {
+       
+        UserSchema.findByIdAndUpdate({ '_id': id }, { $set: { 'name': name, 'age': age,  'is_deleted': is_deleted } }, (err, data) => {
+            if (err) {
+                console.log(err);
             } else {
-                res.redirect('/viewuser')
+                let role = data.role;
+
+                console.log(role);
+                if (role == 'subadmin') {
+                    res.redirect('/viewsubadmin')
+                } else {
+                    res.redirect('/viewuser')
+                }
             }
-        }
-    })
+        })
+    }
 
 }
 
@@ -372,7 +390,7 @@ function logout(req, res) {
 
 
 function adchange(req, res) {
-    res.render('adchange.html');
+    res.render('adchange.html',{mag});
 }
 
 function subadchange(req, res) {
@@ -387,7 +405,11 @@ function subadchange(req, res) {
     UserSchema.findOneAndUpdate({ 'email': email }, { $set: { 'password': hashpass } }, (err, data) => {
         if (err) {
             console.log(err);
-        } else {
+        } else if(data == null){
+            console.log('username & password is wrong');
+            let mag = "Enter valid information"
+            res.render('adchange.html',{mag});
+        }else{
             console.log(data);
             mail(email, pass);
             res.render('changesucc.html');
@@ -415,7 +437,7 @@ function hashpass(req, res, next) {
 }
 
 function adminchangepage(req, res) {
-    res.render('adminchange.html');
+    res.render('adminchange.html',{mag});
 }
 
 
@@ -431,7 +453,8 @@ function adminchange(req, res) {
             console.log(err)
         } else if (data == null) {
             console.log('username & password is wrong');
-            res.render('login.html');
+            let mag = "Enter valid information"
+            res.render('adminchange.html',{mag});
         } else {
             data.comparePassword(oldpass, function (err, isMatch) {
                 if (err) throw err;
@@ -554,11 +577,11 @@ function bylinkchange(req, res) {
         }
         else {
             let token = data.resetlink;
-            console.log("my token",token);
-            if((token == undefined)||(token == null)){
+            console.log("my token", token);
+            if ((token == undefined) || (token == null)) {
                 res.json('Link expired')
-                
-            }else{
+
+            } else {
                 console.log(data);
                 data.password = pass;
                 data.resetlink = undefined;
@@ -594,7 +617,7 @@ function imgupload(req, res) {
 
     form.on('file', function (name, file) {
         cloudinary.v2.uploader.upload(file.path, function (error, result) {
-            console.log("my result",result);
+            console.log("my result", result);
             if (error) {
                 console.log("error:", error);
             }
